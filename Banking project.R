@@ -1,15 +1,21 @@
+#setting the work directory
 setwd("F:\\Data science\\R\\data files")
+#Importing the libraries
 library(dplyr)
 library(tidyr)
 library(car)
+#Loading training and testing data
 b_train=read.csv("bank-full_train.csv",stringsAsFactors = F)
 b_test=read.csv("bank-full_test.csv",stringsAsFactors = F)
+#Changing the dependent variable to Na for prediction purpose 
 b_test$y=NA
+#Creating a new column to distinguish train and test data
 b_train$data="train"
 b_test$data="test"
 b_all=rbind(b_train,b_test)
 
 names(b_all)
+# Exploring the data 
 sort(table(b_all$job))
 sort(table(b_all$marital))
 sort(table(b_all$education))
@@ -18,7 +24,7 @@ sort(table(b_all$housing))
 sort(table(b_all$contact))
 sort(table(b_all$poutcome))
 
-
+# creating the dummies of categorical variables
 CreateDummies=function(data,var,freq_cutoff=0){
   t=table(data[,var])
   t=t[t>freq_cutoff]
@@ -42,9 +48,10 @@ CreateDummies=function(data,var,freq_cutoff=0){
   data[,var]=NULL
   return(data)
 }
+# Filling the missing values
 lapply(b_all,function(x) sum(is.na(x)))
 
-
+# creating dummies
 cat_cols=c("marital","education","default","housing",
            "loan","contact","month","poutcome","y","job")
 
@@ -53,8 +60,9 @@ for(col in cat_cols){
   b_all=CreateDummies(b_all,col,100)
 }
 
-b_all$y_no=as.factor(b_all$y_no)
-
+b_all$y_no=as.factor(b_all$y_no) 
+       
+# Model creation
 library(randomForest)
 library(tree)
 
