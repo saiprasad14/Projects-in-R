@@ -1,9 +1,14 @@
+#Setting the directory
 setwd("F:\\Data science\\R\\data files")
+
+#Importing the libraries
 library(dplyr)
 library(tidyr)
 library(car)
 library(randomForest)
 library(extraTrees)
+
+#Loading the data
 d1_train=read.csv("housing_train.csv",stringsAsFactors = F)
 d1_test=read.csv("housing_test.csv",stringsAsFactors = F)
 d1_test$Price=NA
@@ -21,6 +26,7 @@ sort(table(d1_all$YearBuilt))
 
 d1_all$store=as.factor(d1_all$Price)
 
+# creating dummies
 CreateDummies=function(data,var,freq_cutoff=0){
   t=table(data[,var])
   t=t[t>freq_cutoff]
@@ -68,6 +74,7 @@ for(col in cat_cols){
 
 glimpse(d1_all)
 
+# filling the missing values
 lapply(d1_all,function(x) sum(is.na(x)))
 
 for(col in names(d1_all)){
@@ -103,7 +110,8 @@ set.seed(2)
 s=sample(1:nrow(d1_train),0.7*nrow(d1_train))
 d1_train1=d1_train[s,]
 d1_train2=d1_train[-s,]
-########
+       
+# model building
 rf.model_house=randomForest(Price~.-Address-Postcode-Distance-CouncilArea_-SellerG_Abercromby,data=d1_train1,do.trace=T)
 
 test.score=predict(rf.model_house,newdata = d1_train2,type='prob')[,1]
@@ -114,7 +122,7 @@ pROC::roc(d1_train2$Price,test.score)
 score=predict(rf.model_house,newdata= d1_test, type="prob")[,1]
 write.csv(score,"saiprasad_housingprice_Randomforest_sub3",row.names = F)
 
-##############
+#model 2
 
 vi1=lm(Price~.-Address-Postcode-Distance-CouncilArea_,data = d1_train1)
 sort(vif(vi1),decreasing = T)[1:10]
@@ -174,6 +182,7 @@ plot(fit,2)
 plot(fit,3)
 plot(fit,4)
 
+# predictions
 val.pred=predict(fit,newdata = d1_train2)
 d1_test$predicted_value=predict(fit,newdata = d1_test)
 write.csv(d1_test$predicted_value,"Saiprasad_linearmodel_submission3",row.names = F)
