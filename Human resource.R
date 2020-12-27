@@ -1,7 +1,12 @@
+# setting the directory
 setwd("F:\\Data science\\R\\data files")
+
+# importing the libraries
 library(dplyr)
 library(tidyr)
 library(car)
+
+#Loading the data set
 hr1_train=read.csv("hr_train.csv",stringsAsFactors = F)
 hr1_test=read.csv("hr_test.csv",stringsAsFactors = F)
 hr1_test$left=NA
@@ -11,7 +16,7 @@ hr1_all=rbind(hr1_train,hr1_test)
 names(hr1_all)
 sort(table(hr1_all$salary))
 sort(table(hr1_all$sales))
-
+# Dummy creation
 CreateDummies=function(data,var,freq_cutoff=0){
   t=table(data[,var])
   t=t[t>freq_cutoff]
@@ -50,7 +55,7 @@ for(col in cat_cols){
   hr1_all=CreateDummies(hr1_all,col,600)
 }
 
-
+# MODEL BUILDING
 library(randomForest)
 library(tree)
 
@@ -74,14 +79,14 @@ test.score_hr=predict(tree.model_hr,newdata = hr1_train2,type='vector')[,2]
 
 pROC::roc(hr1_train2$left,test.score_hr) ##### 0.82
 
-########
+#model 2
 
 rf.model_hr=randomForest(left~.,data=hr1_train1,do.trace=T)
 
 test.score=predict(rf.model_hr,newdata = hr1_train2,type='prob')[,2]
 pROC::roc(hr1_train2$left,test.score) #### 0.83
 
-###########
+# model 3
 library(extraTrees)
 library(rJava)
 
